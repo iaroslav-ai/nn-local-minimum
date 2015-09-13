@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 import scipy.optimize as optim
 import random as random
 
-Reps = 1 # number of times to repeat the experiment
+Reps = 10 # number of times to repeat the experiment
 M = 3 # number of dimensions
 Xsz = 100; # number of training instances
-maxdepth = 1000
+maxdepth = 200
 
 # compute single hidden layer neural network
 def HLayer(W,X):
@@ -51,35 +51,41 @@ for rep in range(Reps):
     for depth in range(maxdepth):
         
                 
-        for N in range(2):
+        for N in range(5):
             # add one neuron to network
             W = np.column_stack((W, W[:,0]*0))
             
             # sample random neuron values until fval is not improved
             improved = 1;
             #print "start"
+            
+            
             while (improved > 0):
                 W[:,-1] = np.random.randn(Input.shape[1]+1); # generate random neuron
                 W, fval = L2FixedNN(W, Input, Y) # compute fixed neurons objective
-                if fval <= fv:
+                if fval - fv < 1e-3: # avoid numerical problems
                     improved-=1
                     Wb, fv = np.copy(W), fval
+                else:
+                    print fval - fv
+                    
             W = Wb
             
-            #print "end"
             # do random permutations of neurons
-        
             
-            for i in range(10):
+            Wperm = np.copy(W)    
+            for i in range(100):
                 change = np.random.randn(Input.shape[1]+1);
-                idx = random.randint(1,W.shape[1]-1)
-                W[:,idx] += change # random permutation
-                W, fval = L2FixedNN(W, Input, Y) # compute fixed neurons objective
+                idx = random.randint(1,Wperm.shape[1]-1)
+                Wperm[:,idx] += change # random permutation
+                Wperm, fval = L2FixedNN(Wperm, Input, Y) # compute fixed neurons objective
                 if fval < fv:
                     fv = fval
+                    W = np.copy(Wperm)
                 else:
-                    W[:,idx] -= change
+                    Wperm[:,idx] -= change
             
+            #W = Wb
             # compute gradient descent
             # fvalsGr[N] = optim.minimize(lambda Wfl: L2NN(np.reshape(Wfl,  W.shape), Input, Y) , W.flatten()).fun
             
@@ -88,20 +94,35 @@ for rep in range(Reps):
             
         fvals[depth] += fv
         iters[depth] = depth;
-        W, fval = L2FixedNN(W, Input, Y)
         # replace X with outputs of neurons
         
         G = HLayer(W,Input);
-        #s = W[-1,]
-        #Input = np.concatenate((G, X[:, [-1]]), axis=1)
+        fvl = L2NN(W, Input, Y)
         
+        # Uncommend below for deep nets with NO connection to X
+        
+        s = np.concatenate( ( W[-1,], [X[0,0]*0] ) )
+        Input = np.concatenate((G, X[:, [-1]]), axis=1)
+        
+        
+        # Uncommend below for deep nets WITH connection to X
+        """
         s = np.concatenate( ( W[-1,], X[0,]*0 ) )
         Input = np.concatenate((G, X), axis=1)
+        """
         
         W = np.random.randn(Input.shape[1]+1,1)
         W[:s.shape[0],0] = s;
         W[-1,0] = 1;
-        W, fval2 = L2FixedNN(W, Input, Y)
+        
+        
+        G = HLayer(W,Input);
+        fvl2 = L2NN(W, Input, Y)
+        
+        if  fvl > fv or fvl < fv or fvl2 > fv or fvl2 < fv:
+            fval = fval + 1
+            print "alarm", fvl - fv
+    
 
 
 # plot RESULTS

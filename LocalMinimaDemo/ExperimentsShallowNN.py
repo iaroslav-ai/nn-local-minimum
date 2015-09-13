@@ -63,15 +63,18 @@ for rep in range(Reps):
         # do random permutations of neurons
     
         
+        Wperm = np.copy(W)   
+         
         for i in range(10):
-            change = np.random.randn(M+1);
-            idx = random.randint(0,W.shape[1]-1)
-            W[:,idx] += change # random permutation
-            W, fval = L2FixedNN(W, X, Y) # compute fixed neurons objective
+            change = np.random.randn(X.shape[1]+1);
+            idx = random.randint(1,Wperm.shape[1]-1)
+            Wperm[:,idx] += change # random permutation
+            Wperm, fval = L2FixedNN(Wperm, X, Y) # compute fixed neurons objective
             if fval < fv:
                 fv = fval
+                W = np.copy(Wperm)
             else:
-                W[:,idx] -= change
+                Wperm[:,idx] -= change
         
         # compute gradient descent
         # fvalsGr[N] = optim.minimize(lambda Wfl: L2NN(np.reshape(Wfl,  W.shape), X, Y) , W.flatten()).fun
