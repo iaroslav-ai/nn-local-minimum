@@ -13,12 +13,13 @@ Reps = 10 # number of times to repeat the experiment
 M = 3 # number of dimensions
 Xsz = 100; # number of training instances
 maxdepth = 200
+NeuronsOnLayer = 5
 
 # compute single hidden layer neural network
 def HLayer(W,X):
     result = np.dot( X , W[0:W.shape[0]-1, : ] )
     result[:,1:] = np.maximum(result[:,1:], 0)
-    #result[1:,] = np.tanh(result[1:,], 0)
+    #result[:,1:] = np.tanh(result[:,1:])
     return result
     
 def NN(W,X):
@@ -51,7 +52,7 @@ for rep in range(Reps):
     for depth in range(maxdepth):
         
                 
-        for N in range(5):
+        for N in range(NeuronsOnLayer):
             # add one neuron to network
             W = np.column_stack((W, W[:,0]*0))
             
@@ -63,7 +64,7 @@ for rep in range(Reps):
             while (improved > 0):
                 W[:,-1] = np.random.randn(Input.shape[1]+1); # generate random neuron
                 W, fval = L2FixedNN(W, Input, Y) # compute fixed neurons objective
-                if fval - fv < 1e-3: # avoid numerical problems
+                if fval - fv < 1e-2: # avoid numerical problems
                     improved-=1
                     Wb, fv = np.copy(W), fval
                 else:
@@ -100,16 +101,16 @@ for rep in range(Reps):
         fvl = L2NN(W, Input, Y)
         
         # Uncommend below for deep nets with NO connection to X
-        
+        """
         s = np.concatenate( ( W[-1,], [X[0,0]*0] ) )
         Input = np.concatenate((G, X[:, [-1]]), axis=1)
-        
+        """
         
         # Uncommend below for deep nets WITH connection to X
-        """
+        
         s = np.concatenate( ( W[-1,], X[0,]*0 ) )
         Input = np.concatenate((G, X), axis=1)
-        """
+        
         
         W = np.random.randn(Input.shape[1]+1,1)
         W[:s.shape[0],0] = s;
@@ -127,7 +128,7 @@ for rep in range(Reps):
 
 # plot RESULTS
 fig,ax = plt.subplots(figsize=(10,4))
-ax.plot(iters, ( fvals / Reps ),'-')
+ax.plot(iters, np.log( fvals / Reps ),'-')
 #ax.plot(iters, np.log10( fvalsRs / Reps ),'-')
 #ax.plot(iters, np.log10( fvalsGr / Reps ),'-')
 ax.set_xlabel('Layers')
