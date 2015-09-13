@@ -90,7 +90,7 @@ for depth in range(10000000):
     
     #temp1 = L2NN(W, Wb, Inp, Y)
     V = np.maximum( np.dot(Inp,W) , 0)
-    Inp = np.concatenate( (V, X), axis=1 ) 
+    Inp = np.concatenate( (V, X[:,[-1]]), axis=1 ) 
     #Inp = np.copy(V)
     
     M = Inp.shape[1]

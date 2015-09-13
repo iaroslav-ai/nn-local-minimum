@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from random import randint
 from mpl_toolkits.mplot3d import Axes3D
 
-N = 20 # number of neurons
+N = 10 # number of neurons
 M = 2 # number of dimensions
 Xsz = 1000; # number of training instances
 
@@ -34,7 +34,7 @@ for idx in range(1):
     
     fv = 10 ** 10
     
-    for i in range(1000):
+    for i in range(10):
         
         idx = randint(0, N-1)
         add = np.random.rand(M+1)
